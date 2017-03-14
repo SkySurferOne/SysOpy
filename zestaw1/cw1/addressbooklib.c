@@ -46,9 +46,50 @@ void showAddressBookOnLinkedlist(Node * head) {
   }
 }
 
-// Record * findInAddressBookOnLinkedlist(Node * head, char * searchBy);
-// void deleteFromAddressBookOnLinkedlist(Node ** head, Node * node);
-// void showAddressBookOnLinkedlist(Node *);
+// TODO implement od binary search
+Node * _findInAddressBookOnLinkedlist(Node * head, char * searchBy) {
+  //head = head->right;
+  while (head->right != NULL) {
+    switch (head->sortBy) {
+      case LASTNAME:
+        if (compareCharArrays(head->right->value->lastname, searchBy) == 0)
+          return head;
+        break;
+      case EMAIL:
+        if (compareCharArrays(head->right->value->email, searchBy) == 0)
+          return head;
+        break;
+      case BIRTH_DATE:
+        if (compareBirthDates(head->right->value->birthDate, parseDate(searchBy)) == 0)
+          return head;
+        break;
+      case PHONE_NUMBER:
+        if (compareNumbers(head->right->value->phone, atol(searchBy)) == 0)
+          return head;
+        break;
+    }
+    head = head->right;
+  }
+  return NULL;
+}
+
+Node * findInAddressBookOnLinkedlist(Node * head, char * searchBy) {
+  Node * node = _findInAddressBookOnLinkedlist(head, searchBy);
+  if (node == NULL)
+    return NULL;
+  else
+    return node->right;
+}
+
+void deleteFromAddressBookOnLinkedlist(Node * preNode) {
+  Node * toTrash = preNode->right;
+  if (preNode->right != NULL && preNode->right->right != NULL) {
+    preNode->right->right->left = preNode;
+
+  }
+  if (preNode->right != NULL) preNode->right = preNode->right->right;
+  deleteNode(toTrash);
+}
 // void rebuildAddressBookOnLinkedlist(Node ** head, RecordPropType sortBy);
 
 // tested

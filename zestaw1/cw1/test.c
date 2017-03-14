@@ -86,6 +86,10 @@ int main () {
   addToaddressBookOnLinkedlist(head, contact1);
   addToaddressBookOnLinkedlist(head, contact2);
   showAddressBookOnLinkedlist(head);
+  Node * foundCon2 = _findInAddressBookOnLinkedlist(head, "Dowal");
+  printContactNode(foundCon2->right);
+  deleteFromAddressBookOnLinkedlist(foundCon2);
+  showAddressBookOnLinkedlist(head);
 
   return 0;
 }

@@ -61,9 +61,11 @@ extern void rebuildAddressBookOnTree(Node ** root, RecordPropType sortBy);
 // linked list
 extern Node * makeAddressBookOnLinkedList(RecordPropType sortBy);
 extern void addToaddressBookOnLinkedlist(Node *, Record *);
-extern Record * findInAddressBookOnLinkedlist(Node * head, char * searchBy);
-extern void deleteFromAddressBookOnLinkedlist(Node ** head, Node * node);
+extern Node * findInAddressBookOnLinkedlist(Node * head, char * searchBy);
+extern Node * _findInAddressBookOnLinkedlist(Node * head, char * searchBy);
+extern void deleteFromAddressBookOnLinkedlist(Node * node);
 extern void showAddressBookOnLinkedlist(Node *);
+
 extern void rebuildAddressBookOnLinkedlist(Node ** head, RecordPropType sortBy);
 
 
