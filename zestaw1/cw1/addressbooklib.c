@@ -11,7 +11,41 @@
 Node * makeAddressBookOnLinkedList(RecordPropType sortBy) {
   return makeAddressBookOnTree(sortBy);
 }
-//void addToaddressBookOnLinkedlist(Node *, Record *);
+
+void addToaddressBookOnLinkedlist(Node * head, Record * record) {
+  if (head == NULL) { printf("%s\n", "head is NULL"); return; }
+
+  Node * cp = head;
+  Node * newNode = (Node *) malloc(sizeof(Node));
+  newNode->id = generateId(record);
+  newNode->sortBy = head->sortBy;
+  newNode->value = record;
+  if(cp->right == NULL) {
+    head->right = newNode;
+    newNode->left = head;
+    newNode->right = NULL;
+  } else {
+      while (cp->right != NULL &&
+        compareRecordPropTypes(record, cp->right->value, cp->sortBy) > 0) {
+        cp = cp->right;
+      }
+      newNode->right = cp->right;
+      if (cp->right != NULL) cp->right->left = newNode;
+      newNode->left = cp;
+      cp->right = newNode;
+  }
+
+}
+
+void showAddressBookOnLinkedlist(Node * head) {
+  if (head == NULL) { printf("%s\n", "List is empty"); return; }
+  head = head->right;
+  while (head != NULL) {
+    printContactNode(head);
+    head = head->right;
+  }
+}
+
 // Record * findInAddressBookOnLinkedlist(Node * head, char * searchBy);
 // void deleteFromAddressBookOnLinkedlist(Node ** head, Node * node);
 // void showAddressBookOnLinkedlist(Node *);
