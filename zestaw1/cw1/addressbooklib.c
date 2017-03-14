@@ -8,6 +8,14 @@
     Tree implementation
   ====================================
 */
+Node * makeAddressBookOnLinkedList(RecordPropType sortBy) {
+  return makeAddressBookOnTree(sortBy);
+}
+//void addToaddressBookOnLinkedlist(Node *, Record *);
+// Record * findInAddressBookOnLinkedlist(Node * head, char * searchBy);
+// void deleteFromAddressBookOnLinkedlist(Node ** head, Node * node);
+// void showAddressBookOnLinkedlist(Node *);
+// void rebuildAddressBookOnLinkedlist(Node ** head, RecordPropType sortBy);
 
 // tested
 Node * makeAddressBookOnTree(RecordPropType sortBy) {
