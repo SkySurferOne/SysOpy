@@ -1,4 +1,5 @@
 #include "addressbooklib.h"
+#include <stdlib.h>
 #include <stdio.h>
 
 int main () {
@@ -79,17 +80,39 @@ int main () {
   Record * contact2 = makeContact(
     "Damian", "Zowal",
     "damian@damian.pl",
-    666777888,
+    166777888,
     20, 2, 1996,
     "Dluga", "Krakow", "Polska", "8/90", "33-333"
   );
   addToaddressBookOnLinkedlist(head, contact1);
   addToaddressBookOnLinkedlist(head, contact2);
+
+  rebuildAddressBookOnLinkedlist(&head, PHONE_NUMBER);
+
+  addToaddressBookOnLinkedlist(head, contact2);
+  
   showAddressBookOnLinkedlist(head);
-  Node * foundCon2 = _findInAddressBookOnLinkedlist(head, "Dowal");
-  printContactNode(foundCon2->right);
-  deleteFromAddressBookOnLinkedlist(foundCon2);
-  showAddressBookOnLinkedlist(head);
+  // Node * foundCon2 = _findInAddressBookOnLinkedlist(head, "Dowal");
+  // printContactNode(foundCon2->right);
+  // deleteFromAddressBookOnLinkedlist(foundCon2);
+  // showAddressBookOnLinkedlist(head);
+  //
+  // rebuildAddressBookOnLinkedlist(&head, PHONE_NUMBER);
+  // printf("After rebuild\n");
+  //
+  // Record * contact3 = makeContact(
+  //   "Damian", "Zowal",
+  //   "damian@damian.pl",
+  //   166777888,
+  //   20, 2, 1996,
+  //   "Dluga", "Krakow", "Polska", "8/90", "33-333"
+  // );
+  // //printf("%d\n",&head);
+  // if (head == NULL)
+  //   printf("zle");
+  // addToaddressBookOnLinkedlist(head, contact3);
+  // showAddressBookOnLinkedlist(head);
+
 
   return 0;
 }

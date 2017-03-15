@@ -90,7 +90,33 @@ void deleteFromAddressBookOnLinkedlist(Node * preNode) {
   if (preNode->right != NULL) preNode->right = preNode->right->right;
   deleteNode(toTrash);
 }
-// void rebuildAddressBookOnLinkedlist(Node ** head, RecordPropType sortBy);
+
+// Node * detachNodeFromLinkedList(Node ** node) {
+//   if (*node == NULL) {printf("%s\n", "node is NULL"); return NULL; }
+//   Node * detached = *node;
+//   if ((*node)->right == NULL)
+//     node = NULL;
+//   else
+//     node = &((*node)->right);
+//   detached->right = NULL;
+//   detached->left = NULL;
+//   return detached;
+// }
+
+void rebuildAddressBookOnLinkedlist(Node ** head, RecordPropType sortBy) {
+  if (*head == NULL) { printf("%s\n", "head is NULL"); return; }
+  Node * newHead = makeAddressBookOnLinkedList(sortBy);
+
+  Node * cp = (*head)->right;
+  while (cp != NULL) {
+    //Node * detached = detachNodeFromLinkedList(&cp);
+    Node * toDel = cp;
+    addToaddressBookOnLinkedlist(newHead, cp->value);
+    cp = cp->right;
+    free(toDel);
+  }
+  head = &newHead;
+}
 
 // tested
 Node * makeAddressBookOnTree(RecordPropType sortBy) {
@@ -169,6 +195,7 @@ Node * findInAddressBookOnTree(Node * root, char * searchBy) {
     else
       return findInAddressBookOnTree(root->right, searchBy);
   }
+  return NULL;
 }
 
 Date * parseDate(char * dateStr) {
@@ -312,8 +339,8 @@ int compareRecordPropTypes(Record * a, Record * b, RecordPropType propType) {
       return compareBirthDates(a->birthDate, b->birthDate);
     case PHONE_NUMBER:
       return compareNumbers(a->phone, b->phone);
-
   }
+  return -2;
 }
 
 // a > b -> 1
