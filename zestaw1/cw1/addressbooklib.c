@@ -25,8 +25,9 @@ void addToaddressBookOnLinkedlist(Node * head, Record * record) {
     newNode->left = head;
     newNode->right = NULL;
   } else {
+      RecordPropType sortBy = head->sortBy;
       while (cp->right != NULL &&
-        compareRecordPropTypes(record, cp->right->value, cp->sortBy) > 0) {
+        compareRecordPropTypes(record, cp->right->value, sortBy) > 0) {
         cp = cp->right;
       }
       newNode->right = cp->right;
@@ -64,7 +65,7 @@ Node * _findInAddressBookOnLinkedlist(Node * head, char * searchBy) {
           return head;
         break;
       case PHONE_NUMBER:
-        if (compareNumbers(head->right->value->phone, atol(searchBy)) == 0)
+        if (compareNumbers(head->right->value->phone, (unsigned long) atol(searchBy)) == 0)
           return head;
         break;
     }
@@ -81,13 +82,14 @@ Node * findInAddressBookOnLinkedlist(Node * head, char * searchBy) {
     return node->right;
 }
 
-void deleteFromAddressBookOnLinkedlist(Node * preNode) {
-  Node * toTrash = preNode->right;
-  if (preNode->right != NULL && preNode->right->right != NULL) {
-    preNode->right->right->left = preNode;
+void deleteFromAddressBookOnLinkedlist(Node * node) {
+  Node * toTrash = node;
+  if (node != NULL && node->right != NULL)
+      node->right->left = node->left;
 
-  }
-  if (preNode->right != NULL) preNode->right = preNode->right->right;
+  if(node != NULL && node->left != NULL)
+      node->left->right = node->right;
+
   deleteNode(toTrash);
 }
 
@@ -115,7 +117,7 @@ void rebuildAddressBookOnLinkedlist(Node ** head, RecordPropType sortBy) {
     cp = cp->right;
     free(toDel);
   }
-  head = &newHead;
+  *head = newHead;
 }
 
 // tested
@@ -379,7 +381,7 @@ int compareBirthDates(Date * a, Date * b) {
 }
 
 int compareNumbers(unsigned long a, unsigned long b) {
-  int eval = (a - b);
+  long eval = (a - b);
   if (eval < 0)
     return -1;
   else if (eval > 0)
