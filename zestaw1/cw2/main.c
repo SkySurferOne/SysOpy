@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "lib/addressbooklib.h"
 
 Record *makeRecord(char *pString[9]);
@@ -48,7 +49,14 @@ int readFile(const char * path) {
 
 // TODO timing
 void addRecordToDataStr(Record *pRecord) {
+    clock_t begin = clock();
+
     addToAddressBookOnTree(bookOnTree, pRecord);
+
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("%lf\n", time_spent);
+
     addToaddressBookOnLinkedlist(bookOnList, pRecord);
 }
 
