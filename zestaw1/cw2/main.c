@@ -3,14 +3,21 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <sys/times.h>
 #include "lib/addressbooklib.h"
 
 Record *makeRecord(char *pString[9]);
-
-void addRecordToDataStr(Record *pRecord);
+void addRecordToDataStrTest(Record *pRecord);
 
 Node * bookOnTree = NULL;
 Node * bookOnList = NULL;
+double real_start;
+double real_previous;
+double user_start;
+double user_previous;
+double system_start;
+double system_previus;
+
 
 int readFile(const char * path) {
     FILE * fp = fopen(path, "r");
@@ -39,25 +46,12 @@ int readFile(const char * path) {
         if (i != 0) {
             // make record here
             Record *record = makeRecord(recStrings);
-            addRecordToDataStr(record);
+            addRecordToDataStrTest(record);
         }
         ++i;
     }
 
     return fclose(fp);
-}
-
-// TODO timing
-void addRecordToDataStr(Record *pRecord) {
-    clock_t begin = clock();
-
-    addToAddressBookOnTree(bookOnTree, pRecord);
-
-    clock_t end = clock();
-    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("%lf\n", time_spent);
-
-    addToaddressBookOnLinkedlist(bookOnList, pRecord);
 }
 
 Address *makeAddress(char *streetAddress, char *city, char *country, char *postalCode) {
@@ -81,16 +75,81 @@ Record *makeRecord(char *pString[9]) {
     return record;
 }
 
-// TODO timing
-void makeBooks() {
+void initTime() {
+    struct tms buffer;
+    times(&buffer);
+    real_start = real_previous = clock() / (double)CLOCKS_PER_SEC;
+    user_start = user_previous = buffer.tms_utime / (double)CLOCKS_PER_SEC;
+    system_start = system_previus = buffer.tms_stime / (double)CLOCKS_PER_SEC;
+}
+
+void getAndPrintTime(char *info){
+    struct tms buffer;
+    times(&buffer);
+
+    double real = clock() / (double)CLOCKS_PER_SEC;
+    double user = buffer.tms_utime / (double)CLOCKS_PER_SEC;
+    double sys = buffer.tms_stime / (double)CLOCKS_PER_SEC;
+    if(strcmp(info, "--") != 0 ){
+        printf("%s:\n", info);
+        printf("Times: real = %f, user = %f, system = %f\n", real - real_previous, user - user_previous, sys - system_previus);
+        printf("Times from start: real = %f, user = %f, system = %f\n\n", real - real_start, user - user_start, sys - system_start);
+    }
+    real_previous = real;
+    user_previous = user;
+    system_previus = sys;
+}
+
+// making books
+void makeBooksTest() {
     bookOnTree = makeAddressBookOnTree(LASTNAME);
+    getAndPrintTime("Make book on tree.");
     bookOnList = makeAddressBookOnLinkedList(LASTNAME);
+    getAndPrintTime("Make book on linked list.");
+}
+
+// adding records
+void addRecordToDataStrTest(Record *pRecord) {
+    addToAddressBookOnTree(bookOnTree, pRecord);
+    getAndPrintTime("Add record to address book on tree");
+    addToaddressBookOnLinkedlist(bookOnList, pRecord);
+    getAndPrintTime("Add record to address book on list");
+}
+
+// rebuilding
+void rebuildDataStrTest() {
+    rebuildAddressBookOnTree(&bookOnTree, PHONE_NUMBER);
+    getAndPrintTime("Rebuild book on tree");
+    rebuildAddressBookOnLinkedlist(&bookOnList, PHONE_NUMBER);
+    getAndPrintTime("Rebuild book on list");
+}
+
+// finding
+void findRecordTest() {
+    unsigned long phone = bookOnTree->value->phone;
+    char searchKey[9];
+    snprintf(searchKey, 9, "%zu", phone);
+    printf("Search key: %s\n", searchKey);
+
+    findInAddressBookOnTree(bookOnTree, searchKey);
+    getAndPrintTime("Find record by search key in tree (optimistic)");
+
+    phone = treeMin(bookOnTree)->value->phone;
+    snprintf(searchKey, 9, "%zu", phone);
+    findInAddressBookOnTree(bookOnTree, searchKey);
+    getAndPrintTime("Find record by serach in tree (pessimistic)");
+
 }
 
 int main() {
-    makeBooks();
+    initTime(); // init time variables
+    makeBooksTest(); // test book making
+    readFile("../data.csv"); // read data and test adding records
+    rebuildDataStrTest(); // test rebuild data structures
+    findRecordTest(); // test finding
 
-    readFile("../data.csv");
+    //showAddressBookOnTree(bookOnTree);
+    //showAddressBookOnLinkedlist(bookOnList);
 
     return 0;
 }
