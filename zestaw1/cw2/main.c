@@ -4,13 +4,16 @@
 #include <string.h>
 #include <time.h>
 #include <sys/times.h>
-#include "lib/addressbooklib.h"
+#include "lib/addressbook.h"
 
-Record *makeRecord(char *pString[9]);
+#define FILE_SEP ","
+#define FILE_COL_NUM 10
+
+Record *makeRecord(char *pString[FILE_COL_NUM]);
 void addRecordToDataStrTest(Record *pRecord);
 
-Node * bookOnTree = NULL;
-Node * bookOnList = NULL;
+TreeNode * bookOnTree = NULL;
+ListNode * bookOnList = NULL;
 double real_start;
 double real_previous;
 double user_start;
@@ -32,19 +35,17 @@ int readFile(const char * path) {
     int i = 0;
     while (fgets(line, sizeof line, fp) != NULL) {
         char * tmp = strdup(line);
-        char * recStrings[9];
+        char * recStrings[FILE_COL_NUM];
         int j = 0;
 
-        tok = strtok(tmp, ";");
-        while(tok != NULL) {
-            if(i != 0)
-                recStrings[j] = tok;
-            tok = strtok( NULL,  ";");
+        tok = strtok(tmp, FILE_SEP);
+        while(tok != NULL && i != 0) {
+            recStrings[j] = tok;
+            tok = strtok(NULL, FILE_SEP);
             ++j;
         }
 
         if (i != 0) {
-            // make record here
             Record *record = makeRecord(recStrings);
             addRecordToDataStrTest(record);
         }
@@ -54,24 +55,32 @@ int readFile(const char * path) {
     return fclose(fp);
 }
 
-Address *makeAddress(char *streetAddress, char *city, char *country, char *postalCode) {
+Address *makeAddress(char *street, char *houseNumber, char *city, char *country, char *postalCode) {
     Address * address = (Address *) malloc(sizeof(Address));
-    address->street = streetAddress;
+    address->street = street;
     address->city = city;
     address->country = country;
     address->postalCode = postalCode;
-    address->houseNumber = "";
+    address->houseNumber = houseNumber;
     return address;
 }
 
-Record *makeRecord(char *pString[9]) {
-    Record * record = (Record *)  malloc(sizeof(Record));
+char * removeNewLineSign(char * str) {
+    if (str == NULL || strlen(str) == 0) return "";
+    if(str[strlen(str) - 1] != '\n')
+        return str;
+    str[strlen(str) - 1] = '\0';
+    return str;
+}
+
+Record *makeRecord(char *pString[FILE_COL_NUM]) {
+    Record * record = (Record *) malloc(sizeof(Record));
     record->firstname = pString[0];
     record->lastname = pString[1];
-    record->birthDate = parseDate(pString[2]);
+    record->birthDate = parseDate(pString[2], "/");
     record->email = pString[3];
     record->phone = (unsigned int) atol(pString[4]);
-    record->address = makeAddress(pString[5], pString[6], pString[7], pString[9]);
+    record->address = makeAddress(pString[5], pString[6], pString[7], pString[8], removeNewLineSign(pString[9]));
     return record;
 }
 
@@ -103,9 +112,9 @@ void getAndPrintTime(char *info){
 // making books
 void makeBooksTest() {
     bookOnTree = makeAddressBookOnTree(LASTNAME);
-    getAndPrintTime("Make book on tree.");
+    getAndPrintTime("Make book on tree");
     bookOnList = makeAddressBookOnLinkedList(LASTNAME);
-    getAndPrintTime("Make book on linked list.");
+    getAndPrintTime("Make book on linked list");
 }
 
 // adding records
@@ -125,20 +134,45 @@ void rebuildDataStrTest() {
 }
 
 // finding
-void findRecordTest() {
+void findAndDeleteRecordTest() {
     unsigned long phone = bookOnTree->value->phone;
-    char searchKey[9];
-    snprintf(searchKey, 9, "%zu", phone);
+    char searchKey[10];
+    snprintf(searchKey, 10, "%zu", phone);
     printf("Search key: %s\n", searchKey);
 
-    findInAddressBookOnTree(bookOnTree, searchKey);
+    TreeNode * foundTreeNode = findInAddressBookOnTree(bookOnTree, searchKey);
     getAndPrintTime("Find record by search key in tree (optimistic)");
 
-    phone = treeMin(bookOnTree)->value->phone;
-    snprintf(searchKey, 9, "%zu", phone);
+    phone = getDeepestTreeNode(bookOnTree)->value->phone;
+    snprintf(searchKey, 10, "%zu", phone);
     findInAddressBookOnTree(bookOnTree, searchKey);
-    getAndPrintTime("Find record by serach in tree (pessimistic)");
+    getAndPrintTime("Find record by search in tree (pessimistic)");
 
+    phone = bookOnList->next->value->phone;
+    snprintf(searchKey, 10, "%zu", phone);
+    ListNode * foundListNode = findInAddressBookOnLinkedlist(bookOnList, searchKey);
+    getAndPrintTime("Find record by search in linked list (optimistic)");
+
+    ListNode * cp = bookOnList->next;
+    while (cp != NULL && cp->next != NULL) cp = cp->next;
+    phone = cp->value->phone;
+    snprintf(searchKey, 10, "%zu", phone);
+    findInAddressBookOnLinkedlist(bookOnList, searchKey);
+    getAndPrintTime("Find record by search in linked list (pessimistic)");
+
+    deleteFromAddressBookOnTree(&bookOnTree, foundTreeNode);
+    getAndPrintTime("Delete node on tree");
+
+    deleteFromAddressBookOnLinkedlist(foundListNode);
+    getAndPrintTime("Delete node on linked list");
+}
+
+void deleteAddressBooks() {
+    deleteAddressBookOnTree(&bookOnTree);
+    getAndPrintTime("Delete whole address book on tree");
+
+    deleteAddressBookOnLinkedList(&bookOnList);
+    getAndPrintTime("Delete whole address book on linked list");
 }
 
 int main() {
@@ -146,10 +180,8 @@ int main() {
     makeBooksTest(); // test book making
     readFile("../data.csv"); // read data and test adding records
     rebuildDataStrTest(); // test rebuild data structures
-    findRecordTest(); // test finding
-
-    //showAddressBookOnTree(bookOnTree);
-    //showAddressBookOnLinkedlist(bookOnList);
+    findAndDeleteRecordTest(); // test finding and deleting
+    deleteAddressBooks(); // test deleting whole books
 
     return 0;
 }
