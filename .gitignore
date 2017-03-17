@@ -12,4 +12,4 @@ CMakeCache.txt
 .idea/
 cmake-build-debug/
 build/
-result*
+#result*
