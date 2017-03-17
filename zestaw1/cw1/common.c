@@ -168,7 +168,7 @@ void * pop(Stack ** stack) {
     (*stack) = (*stack)->prev;
     free(tmp);
     return item;
-};
+}
 
 int empty(Stack * stack) {
     return (stack == NULL);
