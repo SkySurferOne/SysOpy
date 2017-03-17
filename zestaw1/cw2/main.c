@@ -4,7 +4,7 @@
 #include <string.h>
 #include <time.h>
 #include <sys/times.h>
-#include "lib/addressbook.h"
+#include "addressbook.h"
 
 #define FILE_SEP ","
 #define FILE_COL_NUM 10

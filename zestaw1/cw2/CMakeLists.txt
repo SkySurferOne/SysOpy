@@ -4,10 +4,11 @@ project(cw2)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
 
-add_subdirectory(lib)
+link_directories(../cw1/cmake-build-debug)
 
 set(SOURCE_FILES main.c)
 
 add_executable(main ${SOURCE_FILES})
 
-target_link_libraries(main addressbook)
+include_directories(../cw1 include src)
+target_link_libraries(main addressbookStatic)
