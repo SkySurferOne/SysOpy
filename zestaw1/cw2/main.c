@@ -4,6 +4,7 @@
 #include <string.h>
 #include <time.h>
 #include <sys/times.h>
+#include <unistd.h>
 #include "addressbook.h"
 
 #define FILE_SEP ","
@@ -178,7 +179,14 @@ void deleteAddressBooks() {
 int main() {
     initTime(); // init time variables
     makeBooksTest(); // test book making
-    readFile("../data.csv"); // read data and test adding records
+    if (!access("../data.csv", F_OK ))
+        readFile("../data.csv"); // read data and test adding records
+    else if (!access("data.csv", F_OK ))
+        readFile("data.csv");
+    else {
+        printf("Cannot reach the file 'data.csv'");
+        exit(1);
+    }
     rebuildDataStrTest(); // test rebuild data structures
     findAndDeleteRecordTest(); // test finding and deleting
     deleteAddressBooks(); // test deleting whole books
