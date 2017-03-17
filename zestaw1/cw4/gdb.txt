@@ -1,0 +1,9 @@
+(...)
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000000000401244 in findAndDeleteRecordTest () at /home/damian/Desktop/Warsztat/sysopy/zestaw1/cw4/main.c:153
+153         phone = bookOnList->prev->value->phone;
+(gdb)
+
+
+153:    phone = bookOnList->prev->value->phone; // odwolanie sie do NULL
