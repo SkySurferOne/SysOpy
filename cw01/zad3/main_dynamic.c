@@ -231,10 +231,10 @@ void loadDynApi() {
 }
 
 int main() {
-    if (!access("../../cw1/build/libaddressbookShared.so", F_OK ))
-        lib = dlopen ("../../cw1/build/libaddressbookShared.so", RTLD_LAZY);
-    else if (!access("../cw1/build/libaddressbookShared.so", F_OK )) {
-        lib = dlopen ("../cw1/build/libaddressbookShared.so", RTLD_LAZY);
+    if (!access("../../zad1/build/libaddressbookShared.so", F_OK ))
+        lib = dlopen ("../../zad1/build/libaddressbookShared.so", RTLD_LAZY);
+    else if (!access("../zad1/build/libaddressbookShared.so", F_OK )) {
+        lib = dlopen ("../zad1/build/libaddressbookShared.so", RTLD_LAZY);
     } else {
         printf("Cannot find the 'libaddressbookShared.so' file");
         exit(1);
@@ -249,10 +249,10 @@ int main() {
         readFile("../data.csv"); // read data and test adding records
     else if (!access("data.csv", F_OK ))
         readFile("data.csv");
-    else if (!access("../../cw2/data.csv", F_OK ))
-        readFile("../../cw2/data.csv");
-    else if (!access("../cw2/data.csv", F_OK ))
-        readFile("../cw2/data.csv");
+    else if (!access("../../zad2/data.csv", F_OK ))
+        readFile("../../zad2/data.csv");
+    else if (!access("../zad2/data.csv", F_OK ))
+        readFile("../zad2/data.csv");
     else {
         printf("Cannot reach the file 'data.csv'");
         exit(1);

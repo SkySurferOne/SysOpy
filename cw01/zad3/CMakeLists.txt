@@ -6,13 +6,13 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic -Wall -Werror")
 
 set(CMAKE_C_STANDARD 11)
 
-link_directories(../cw1/build)
-include_directories(../cw1 include src)
+link_directories(../zad1/build)
+include_directories(../zad1 include src)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build)
 
 # compile with static lib
-set(SOURCE_FILES ../cw2/main.c)
+set(SOURCE_FILES ../zad2/main.c)
 add_executable(cw3a_static ${SOURCE_FILES})
 target_link_libraries(cw3a_static addressbookStatic)
 
