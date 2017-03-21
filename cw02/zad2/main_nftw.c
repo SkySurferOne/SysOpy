@@ -8,9 +8,15 @@
 
 char * rootDir = NULL;
 int MAX_SIZE = 0;
+struct FTW {
+    int base;
+    int level;
+};
 
 void list_files(char *, int);
 int nftw(const char *dirpath, int (*fn) (const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf), int nopenfd, int flags);
+void parse_argv(int, char **);
+
 
 int main(int argc, char **argv) {
     parse_argv(argc, argv);
@@ -69,9 +75,9 @@ int print_file_info(const char *path, const struct stat *fileStat, int typeflag,
 
     printf("---------------------------\n");
     printf("Absolute path: \t\t%s\n", path);
-    printf("File Size: \t\t%d bytes\n", fileStat->st_size);
-    printf("Number of Links: \t%d\n", fileStat->st_nlink);
-    printf("File inode: \t\t%d\n", fileStat->st_ino);
+    printf("File Size: \t\t%ld bytes\n", fileStat->st_size);
+    printf("Number of Links: \t%ld\n", fileStat->st_nlink);
+    printf("File inode: \t\t%ld\n", fileStat->st_ino);
     printf("Last modification: \t\t%s", ctime(&fileStat->st_mtime));
 
     printf("File Permissions: \t");

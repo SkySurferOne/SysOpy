@@ -42,9 +42,9 @@ void print_file_info(char *fileName, char *relpath, struct stat *fileStat) {
     printf("Information for %s\n", fileName);
     printf("---------------------------\n");
     printf("Absolute path: \t\t%s%s\n", rootDir, relpath);
-    printf("File Size: \t\t%d bytes\n", fileStat->st_size);
-    printf("Number of Links: \t%d\n", fileStat->st_nlink);
-    printf("File inode: \t\t%d\n", fileStat->st_ino);
+    printf("File Size: \t\t%ld bytes\n", fileStat->st_size);
+    printf("Number of Links: \t%ld\n", fileStat->st_nlink);
+    printf("File inode: \t\t%ld\n", fileStat->st_ino);
     printf("Last modification: \t\t%s", ctime(&fileStat->st_mtime));
 
     printf("File Permissions: \t");

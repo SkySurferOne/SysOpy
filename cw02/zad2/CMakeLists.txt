@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.6)
 project(zad2)
 
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic -Wall -Werror")
 
 set(UTILS_SRC_FILES utils.c utils.h)
 set(SOURCE_FILES_1 main.c ${UTILS_SRC_FILES})
