@@ -9,6 +9,11 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <errno.h>
+#include <limits.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <time.h>
 
 struct Stack {
     struct Stack * prev;

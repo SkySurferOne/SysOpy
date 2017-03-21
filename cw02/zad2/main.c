@@ -1,8 +1,3 @@
-#include <errno.h>
-#include <limits.h>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <time.h>
 #include "utils.h"
 
 Stack * tmp;
@@ -12,12 +7,28 @@ void parse_argv(int, char **);
 void search_recursive(char *, int);
 void print_file_info(char *, char *, struct stat *);
 void clear_tmp_stack();
+void fix_root_dir();
 
 int main(int argc, char **argv) {
     tmp = stackInit();
     parse_argv(argc, argv);
 
     return 0;
+}
+
+void fix_root_dir() {
+    if (rootDir == NULL) return;
+    int l = strlen(rootDir);
+    int i;
+    for (i=l-1; i>0; i--) {
+        if (rootDir[i] == '/')
+            break;
+    }
+    int newSize = i + 1;
+    char *fixed = (char *) malloc(sizeof(char) * newSize + 1);
+    strncpy(fixed, rootDir, newSize);
+    fixed[newSize] = '\0';
+    rootDir = fixed;
 }
 
 void clear_tmp_stack() {
@@ -90,21 +101,6 @@ void search_recursive(char *dirPath, int bytes) {
     closedir(d);
 }
 
-void fix_root_dir() {
-    if (rootDir == NULL) return;
-    int l = strlen(rootDir);
-    int i;
-    for (i=l-1; i>0; i--) {
-        if (rootDir[i] == '/')
-            break;
-    }
-    int newSize = i + 1;
-    char *fixed = (char *) malloc(sizeof(char) * newSize + 1);
-    strncpy(fixed, rootDir, newSize);
-    fixed[newSize] = '\0';
-    rootDir = fixed;
-}
-
 void parse_argv(int argc, char ** argv) {
     char *dirPath, *endptr, *str;
     long val;
@@ -130,7 +126,6 @@ void parse_argv(int argc, char ** argv) {
         exit(EXIT_FAILURE);
     }
 
-    printf("%s, %d\n", dirPath, bytes);
     search_recursive(dirPath, bytes);
     clear_tmp_stack(); // delete allocated memory in str_concat
     free(rootDir);

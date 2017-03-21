@@ -3,5 +3,9 @@ project(zad2)
 
 set(CMAKE_C_STANDARD 99)
 
-set(SOURCE_FILES main.c utils.c utils.h)
-add_executable(zad2 ${SOURCE_FILES})
+set(UTILS_SRC_FILES utils.c utils.h)
+set(SOURCE_FILES_1 main.c ${UTILS_SRC_FILES})
+set(SOURCE_FILES_2 main_nftw.c ${UTILS_SRC_FILES})
+
+add_executable(zad2 ${SOURCE_FILES_1})
+add_executable(zad2_nftw ${SOURCE_FILES_2})
