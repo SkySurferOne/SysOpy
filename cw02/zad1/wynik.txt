@@ -1,0 +1,48 @@
+lib_sort testing (rec_num: 3000, rec_size: 4)
+Times: real = 1.234454, user = 0.000035, system = 0.000088
+
+lib_shuffle testing (rec_num: 3000, rec_size: 4)
+Times: real = 0.012268, user = 0.000000, system = 0.000001
+
+lib_sort testing (rec_num: 3000, rec_size: 512)
+Times: real = 1.767382, user = 0.000054, system = 0.000121
+
+lib_shuffle testing (rec_num: 3000, rec_size: 512)
+Times: real = 0.015690, user = 0.000000, system = 0.000000
+
+lib_sort testing (rec_num: 3000, rec_size: 4096)
+Times: real = 3.623819, user = 0.000063, system = 0.000298
+
+lib_shuffle testing (rec_num: 3000, rec_size: 4096)
+Times: real = 0.062731, user = 0.000001, system = 0.000004
+
+lib_sort testing (rec_num: 3000, rec_size: 8192)
+Times: real = 4.956313, user = 0.000078, system = 0.000417
+
+lib_shuffle testing (rec_num: 3000, rec_size: 8192)
+Times: real = 0.044375, user = 0.000000, system = 0.000004
+
+sys_sort testing (rec_num: 3000, rec_size: 4)
+Times: real = 1.374406, user = 0.000021, system = 0.000116
+
+sys_shuffle testing (rec_num: 3000, rec_size: 4)
+Times: real = 0.012626, user = 0.000000, system = 0.000001
+
+sys_sort testing (rec_num: 3000, rec_size: 512)
+Times: real = 1.698620, user = 0.000027, system = 0.000142
+
+sys_shuffle testing (rec_num: 3000, rec_size: 512)
+Times: real = 0.017345, user = 0.000000, system = 0.000001
+
+sys_sort testing (rec_num: 3000, rec_size: 4096)
+Times: real = 2.540548, user = 0.000032, system = 0.000222
+
+sys_shuffle testing (rec_num: 3000, rec_size: 4096)
+Times: real = 0.023829, user = 0.000000, system = 0.000002
+
+sys_sort testing (rec_num: 3000, rec_size: 8192)
+Times: real = 3.561484, user = 0.000040, system = 0.000315
+
+sys_shuffle testing (rec_num: 3000, rec_size: 8192)
+Times: real = 0.028072, user = 0.000000, system = 0.000002
+
