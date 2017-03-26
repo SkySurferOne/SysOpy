@@ -1,0 +1,23 @@
+#zm ./CMakeFiles
+
+echo test ls:
+ls
+echo ------------
+echo
+
+echo test testenvvar:
+./testenvvar zm
+echo ------------
+echo
+
+echo test 'ls -l get(zm)':
+ls -l $zm
+echo ------------
+echo
+
+#zm
+
+echo after deletion of 'zm'
+./testenvvar zm
+echo ------------
+echo
