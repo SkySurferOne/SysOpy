@@ -28,6 +28,7 @@ void receive_request(int, siginfo_t *, void *);
 void start_clock();
 float stop_clock();
 void terminate_program(int, siginfo_t *, void *);
+void wait_for_pid(pid_t);
 
 // globals
 ParsedArgs *parsedArgs;
@@ -55,8 +56,7 @@ void terminate_program(int sig, siginfo_t *siginfo, void *context) {
 }
 
 void create_children() {
-    pid_t pid, w;
-    int status;
+    pid_t pid;
 
     range(parsedArgs->childNo) {
         pid = fork();
@@ -70,44 +70,55 @@ void create_children() {
             printf("\t>>%d<< started working\n", getpid());
 //            struct sigaction act;
 //            act.sa_sigaction = &get_permission;
-//            act.sa_flags = SA_SIGINFO;
+//            act.sa_flags = SA_SIGINFO | SA_RESTART;
 //            sigaction(SIGUSR2, &act, NULL);
 
 
             simulate_work();
 
             start_clock();
+            printf("i: %d\n", i);
             send_request();
             if(pause() == -1) {
                 printf("GET PERMISSION signal was caught by <<%d>>\n", getpid());
             }
+
             printf("Time: %f [sec]\n", stop_clock());
 
             _exit(0);
 
         } else {
+            printf("par i: %d\n", i);
             allChildren[i] = pid;
 
-            if (DO_ASYNC)
-                w = waitpid(-1, &status, 0);
-            else
-                w = waitpid(pid, &status, 0);
-
-            //wait(&status);
-
-            printf("After waiting waitpid ret: >>%d<<, status: %d\n", w, status);
-            if (WIFEXITED(status)) {
-                printf("exited, status=%d\n", WEXITSTATUS(status));
-            } else if (WIFSIGNALED(status)) {
-                printf("killed by signal %d\n", WTERMSIG(status));
-            } else if (WIFSTOPPED(status)) {
-                printf("stopped by signal %d\n", WSTOPSIG(status));
-            } else if (WIFCONTINUED(status)) {
-                printf("continued\n");
+            if (i >= parsedArgs->reqNo) {
+                wait_for_pid(pid);
             }
-
         }
 
+    }
+}
+
+void wait_for_pid(pid_t pid) {
+    pid_t w;
+    int status;
+
+    if (DO_ASYNC)
+        w = waitpid(-1, &status, 0);
+    else
+        w = waitpid(pid, &status, 0);
+
+    //wait(&status);
+
+    printf("After waiting waitpid ret: >>%d<<, status: %d\n", w, status);
+    if (WIFEXITED(status)) {
+        printf("exited, status=%d\n", WEXITSTATUS(status));
+    } else if (WIFSIGNALED(status)) {
+        printf("killed by signal %d\n", WTERMSIG(status));
+    } else if (WIFSTOPPED(status)) {
+        printf("stopped by signal %d\n", WSTOPSIG(status));
+    } else if (WIFCONTINUED(status)) {
+        printf("continued\n");
     }
 }
 
@@ -145,6 +156,8 @@ void receive_request(int sig, siginfo_t *siginfo, void *context) {
     if (receivedReq == parsedArgs->reqNo) {
         range(parsedArgs->reqNo) {
             send_permission(suspendedProc[i]);
+            // wait
+            wait_for_pid(suspendedProc[i]);
         }
     }
 
@@ -180,19 +193,24 @@ void config() {
     memset(allChildren, 0, sizeof(pid_t) * parsedArgs->childNo);
 
     struct sigaction act;
+    memset(&act, 0, sizeof(act));
+
     act.sa_sigaction = &receive_request;
-    act.sa_flags = SA_SIGINFO;
+    act.sa_flags = SA_SIGINFO | SA_RESTART;
     sigaction(SIGUSR1, &act, NULL);
 
     act.sa_sigaction = &get_permission;
+    act.sa_flags = SA_SIGINFO;
     sigaction(SIGUSR2, &act, NULL);
 
     act.sa_sigaction = real_time_handler;
+    act.sa_flags = SA_SIGINFO | SA_RESTART;
     sigaction(SIGRTMIN + 1, &act, NULL);
     sigaction(SIGRTMIN + 2, &act, NULL);
     sigaction(SIGRTMIN + 3, &act, NULL);
 
     act.sa_sigaction = &terminate_program;
+    act.sa_flags = SA_SIGINFO;
     sigaction(SIGINT, &act, NULL);
 
     create_children();
