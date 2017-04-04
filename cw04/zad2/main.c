@@ -32,8 +32,8 @@ void wait_for_pid(pid_t);
 
 // globals
 ParsedArgs *parsedArgs;
-pid_t *suspendedProc = NULL, *allChildren = NULL, PPID;
-int receivedReq = 0;
+pid_t *suspendedProc = NULL, *allChildren = NULL, PPID, PCP;
+int receivedReq = 0, susp;
 clock_t start, end;
 
 int main(int argc, char ** argv) {
@@ -65,38 +65,34 @@ void create_children() {
             exit(EXIT_FAILURE);
         }
 
-
         if (pid == 0) {
             printf("\t>>%d<< started working\n", getpid());
-//            struct sigaction act;
-//            act.sa_sigaction = &get_permission;
-//            act.sa_flags = SA_SIGINFO | SA_RESTART;
-//            sigaction(SIGUSR2, &act, NULL);
-
 
             simulate_work();
 
             start_clock();
-            printf("i: %d\n", i);
             send_request();
             if(pause() == -1) {
                 printf("GET PERMISSION signal was caught by <<%d>>\n", getpid());
             }
-
             printf("Time: %f [sec]\n", stop_clock());
 
             _exit(0);
 
         } else {
-            printf("par i: %d\n", i);
             allChildren[i] = pid;
 
-            if (i >= parsedArgs->reqNo) {
+            if (i + 1 == parsedArgs->reqNo) PCP = pid;
+            if (i + 1>= parsedArgs->reqNo) {
                 wait_for_pid(pid);
+            } else {
+                susp = 1;
+                while(susp){}
             }
-        }
 
+        }
     }
+
 }
 
 void wait_for_pid(pid_t pid) {
@@ -108,7 +104,6 @@ void wait_for_pid(pid_t pid) {
     else
         w = waitpid(pid, &status, 0);
 
-    //wait(&status);
 
     printf("After waiting waitpid ret: >>%d<<, status: %d\n", w, status);
     if (WIFEXITED(status)) {
@@ -153,17 +148,20 @@ void receive_request(int sig, siginfo_t *siginfo, void *context) {
         suspendedProc[receivedReq] = siginfo->si_pid;
     receivedReq++;
 
+    susp = 0;
     if (receivedReq == parsedArgs->reqNo) {
         range(parsedArgs->reqNo) {
             send_permission(suspendedProc[i]);
             // wait
-            wait_for_pid(suspendedProc[i]);
+            if(siginfo->si_pid != PCP)
+                wait_for_pid(suspendedProc[i]);
         }
     }
 
     if (receivedReq > parsedArgs->reqNo) {
         send_permission(siginfo->si_pid);
     }
+
 }
 
 void send_permission(pid_t pid) {
