@@ -31,7 +31,7 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context) {
 
 void config() {
     printf("%d\n", getpid());
-    signal(18, toggle_reverse);
+    signal(SIGTSTP, toggle_reverse);
 
     struct sigaction act;
     act.sa_sigaction = &handle_sigint;
