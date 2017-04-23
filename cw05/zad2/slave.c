@@ -43,7 +43,7 @@ void parse_args(int argc, char **argv, ParsedArgs *parsedArgs) {
 }
 
 void write_to_fifo(char *path, long N, int K) {
-    FILE *fp = fopen(path, "w+");
+    FILE *fp = fopen(path, "a");
     if(fp == NULL){
         printf("Error while opening fifo by master\n");
         kill(getppid(), SIGRTMIN+2);

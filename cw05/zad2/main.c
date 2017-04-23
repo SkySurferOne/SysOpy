@@ -82,12 +82,12 @@ void config() {
 
 void sig_handler(int sig, siginfo_t *siginfo, void *context) {
     if (sig == SIGRTMIN) {
-        //printf("Fifo is ready\n");
+        printf("Fifo is ready\n");
         // fifo is ready
         fifoIsReady = 1;
     }
     else if (sig == SIGRTMIN + 1) {
-        //printf("Main: Slave is ready\n");
+        printf("Main: Slave is ready\n");
         // slaves are ready, master can start reading form fifo
         if (--slavesReadyCounter == 0)
             kill(masterPid, SIGRTMIN + 1);
@@ -120,7 +120,7 @@ void start_master(char *path, char *R) {
     } else {
         masterPid = pid;
         children[0] = masterPid;
-        //printf("Master pid: %d\n", masterPid);
+        printf("Master pid: %d\n", masterPid);
     }
 
     while(fifoIsReady != 1) { sleep(1); }
