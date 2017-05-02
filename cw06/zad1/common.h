@@ -5,12 +5,16 @@
 #ifndef ZAD1_COMMON_H
 #define ZAD1_COMMON_H
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
+#include <unistd.h>
+#include <time.h>
 
 #define MSGSZ     128
 
@@ -24,19 +28,17 @@
 #define LOGOUT_REQ 10
 
 #define PRINT 12
-#define OK 13
-#define ERROR 14
-
-#define SERVER_ID -1
 #define UNREGISTERED -2
+
 #define REGISTER_OK 11
 
-typedef struct msgbuf {
+typedef struct message_buf {
     long    mtype;
     char    mtext[MSGSZ];
     pid_t senderPid;
-    //int clientId;
 } message_buf;
+
+const size_t MSGBUF_SIZE = sizeof(message_buf) - sizeof(long);
 
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"

@@ -1,5 +1,3 @@
-#include <zconf.h>
-#include <signal.h>
 #include "common.h"
 
 // api
@@ -22,7 +20,6 @@ pid_t globalppid = -1;
 
 int main() {
     pid_t pid;
-
     globalppid = getpid();
     printf(ANSI_COLOR_YELLOW "[DEBUG] client PID: %d" ANSI_COLOR_RESET "\n", globalppid);
 
@@ -73,13 +70,12 @@ void send_msg(int req, char* buf) {
     size_t buf_length;
 
     sbuf.mtype = req;
-    //sbuf.clientId = clientId;
     sbuf.senderPid = globalppid;
     sprintf(sbuf.mtext, "%s", buf);
 
     buf_length = strlen(sbuf.mtext) + 1;
 
-    if (serverMsqid == -1 || msgsnd(serverMsqid, &sbuf, buf_length, IPC_NOWAIT) < 0) {
+    if (serverMsqid == -1 || msgsnd(serverMsqid, &sbuf, MSGBUF_SIZE, IPC_NOWAIT) < 0) {
         printf ("%d, %ld, %s, %ld\n", serverMsqid, sbuf.mtype, sbuf.mtext, buf_length);
         perror("msgsnd: sending message failed");
         exit(EXIT_FAILURE);
@@ -117,7 +113,7 @@ void wait_for_registration() {
         msgctl(clientMsqid, IPC_STAT, &buf);
 
         if(buf.msg_qnum != 0) {
-            if (msgrcv(clientMsqid, &rbuf, MSGSZ, 0, IPC_NOWAIT) < 0) {
+            if (msgrcv(clientMsqid, &rbuf, MSGBUF_SIZE, 0, IPC_NOWAIT) < 0) {
                 perror("msgrcv: receiving message failed");
                 exit(EXIT_FAILURE);
             }
@@ -175,21 +171,21 @@ void open_req_loop() {
             default:
                 printf("Unknown command. Press write 'h' to see help.\n");
         }
-        if(cmd == 'q') break;
+        if(cmd == 'q' || cmd == 's') break;
         fflush(stdin);
     }
     while(1){}; // wait for kill
 }
 
 void listen_res() {
-    message_buf  rbuf;
+    message_buf rbuf;
     struct msqid_ds buf;
 
     while(1) {
         msgctl(clientMsqid, IPC_STAT, &buf);
 
         if(buf.msg_qnum != 0) {
-            if (msgrcv(clientMsqid, &rbuf, MSGSZ, 1, 0) < 0) {
+            if (msgrcv(clientMsqid, &rbuf, MSGBUF_SIZE, 0, IPC_NOWAIT) < 0) {
                 perror("msgrcv: receiving message failed");
                 exit(EXIT_FAILURE);
             }
