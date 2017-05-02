@@ -42,11 +42,10 @@ int main() {
 }
 
 key_t make_queue() {
-    char* envHome = getenv("HOME");
     key_t clientKey;
     int msgflg, msqid;
 
-    if ((clientKey = ftok(envHome, getpid())) == -1) {
+    if ((clientKey = ftok(getenv("HOME"), globalppid)) == -1) {
         perror("ftok: generating IPC key failed");
         exit(EXIT_FAILURE);
     }
@@ -62,7 +61,7 @@ key_t make_queue() {
     return clientKey;
 }
 
-void register_on_server(int clientKey) {
+void register_on_server(key_t clientKey) {
     char buf[MSGSZ];
     sprintf(buf, "%d", clientKey);
     printf(ANSI_COLOR_YELLOW "[DEBUG] sending client key: %s" ANSI_COLOR_RESET "\n", buf);
@@ -74,19 +73,20 @@ void send_msg(int req, char* buf) {
     size_t buf_length;
 
     sbuf.mtype = req;
-    sbuf.clientId = clientId;
-    sbuf.senderPid = 333;
+    //sbuf.clientId = clientId;
+    sbuf.senderPid = globalppid;
     sprintf(sbuf.mtext, "%s", buf);
 
     buf_length = strlen(sbuf.mtext) + 1;
 
-    if (serverMsqid == -1 || msgsnd(serverMsqid, &sbuf, MSGSZ+1, IPC_NOWAIT) < 0) {
+    if (serverMsqid == -1 || msgsnd(serverMsqid, &sbuf, buf_length, IPC_NOWAIT) < 0) {
         printf ("%d, %ld, %s, %ld\n", serverMsqid, sbuf.mtype, sbuf.mtext, buf_length);
         perror("msgsnd: sending message failed");
         exit(EXIT_FAILURE);
     }
-    else
+    else {
         printf("Message: \"%s\" has been sent\n", sbuf.mtext);
+    }
 }
 
 void set_server_queue() {

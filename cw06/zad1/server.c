@@ -5,7 +5,7 @@
 #define CLIENTS_MAX_NUM 20
 
 typedef struct client {
-    int key;
+    key_t key;
     pid_t pid;
 } client;
 
@@ -67,11 +67,12 @@ void get_msg_from_clients(int msqid) {
 
         if(buf.msg_qnum > 0) {
 
-            if (msgrcv(msqid, &rbuf, MSGSZ+1, 0, IPC_NOWAIT) < 0) {
+            if (msgrcv(msqid, &rbuf, MSGSZ, 0, IPC_NOWAIT) < 0) {
                 perror("msgrcv: receiving message failed");
                 exit(EXIT_FAILURE);
             }
 
+            printf("[DEBUG] client PID %d\n", rbuf.senderPid);
             printf(ANSI_COLOR_YELLOW "[DEBUG] Received message: %s with type %ld" ANSI_COLOR_RESET "\n", rbuf.mtext, rbuf.mtype);
             request_handler(rbuf);
         }
@@ -81,7 +82,6 @@ void get_msg_from_clients(int msqid) {
 void request_handler(message_buf rbuf) {
     switch (rbuf.mtype) {
         case REGISTER_REQ:
-            printf("[DEBUG] client PID %d\n", rbuf.senderPid);
             register_client(rbuf.mtext, rbuf.senderPid);
             break;
         case ECHO_REQ:
@@ -116,7 +116,7 @@ void echo_service(message_buf buf) {
     message_buf newMsg;
     newMsg.senderPid = getpid();
     sprintf(newMsg.mtext, "%s", buf.mtext);
-    newMsg.clientId = SERVER_ID;
+    //newMsg.clientId = SERVER_ID;
     newMsg.mtype = PRINT;
     buf_length = strlen(newMsg.mtext) + 1 ;
 
@@ -177,7 +177,7 @@ void register_client(char * key_str, pid_t pid) {
     }
     int msqid;
     size_t buf_length;
-    int key = atoi(key_str);
+    key_t key = (key_t) atol(key_str);
     client clientStr;
 
     if ((msqid = msgget(key, 0666)) < 0) {
@@ -192,7 +192,7 @@ void register_client(char * key_str, pid_t pid) {
     message_buf newMsg;
     newMsg.senderPid = getpid();
     sprintf(newMsg.mtext, "%d", idCounter++);
-    newMsg.clientId = SERVER_ID;
+    //newMsg.clientId = SERVER_ID;
     newMsg.mtype = REGISTER_OK;
     buf_length = strlen(newMsg.mtext) + 1 ;
 

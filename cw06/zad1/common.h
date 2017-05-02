@@ -35,7 +35,7 @@ typedef struct msgbuf {
     long    mtype;
     char    mtext[MSGSZ];
     pid_t senderPid;
-    int clientId;
+    //int clientId;
 } message_buf;
 
 #define ANSI_COLOR_RED     "\x1b[31m"
