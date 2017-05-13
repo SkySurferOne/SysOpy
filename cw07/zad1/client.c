@@ -34,7 +34,8 @@ int main(int argc, char **argv) {
 }
 
 void sigint_handler(int sig, siginfo_t *siginfo, void *context) {
-    printf("Received sigint. Closing barber.\n");
+    printf("Received sigint. Closing client.\n");
+    clean();
     exit(EXIT_SUCCESS);
 }
 
@@ -68,6 +69,7 @@ void make_clients() {
     for(int i = 0; i < parsedArgs->clientsNum; i++) {
         if(fork() == 0) {
             goto_barber();
+
             _exit(EXIT_SUCCESS);
         }
     }
@@ -77,7 +79,7 @@ void make_clients() {
         clientsCounter++;
 
         if(status == EXIT_SUCCESS) {
-            clientsCounter++;
+            // printf("pid: %d\n", p);
         }
         else {
             printf("child error\n");
@@ -87,8 +89,8 @@ void make_clients() {
 }
 
 int try_to_get_haircut() {
-    int status;
     take_semaphore(sid, FIFO_SEM_NUM);
+    int status;
     int barberSemVal = semctl(sid, BARBER_SEM_NUM, GETVAL);
     if(barberSemVal == -1) {
         printf("getting barber semaphore value error\n");
@@ -103,6 +105,7 @@ int try_to_get_haircut() {
         bqueue_occupy_chair(smaddr, getpid());
         status = 0;
     } else {
+        // take_semaphore(sid, CUT_SEM_NUM);
         if(bqueue_put(smaddr, getpid()) == -1) {
             printf(ANSI_COLOR_YELLOW "[%zu] CLIENT (%d): Barber institution is full. Going away."
                            ANSI_COLOR_RESET "\n", get_time(), getpid());
@@ -112,6 +115,7 @@ int try_to_get_haircut() {
                            ANSI_COLOR_RESET "\n", get_time(), getpid());
             status = 0;
         }
+        // give_semaphore(sid, CUT_SEM_NUM);
     }
 
     give_semaphore(sid, FIFO_SEM_NUM);
@@ -131,12 +135,22 @@ void goto_barber() {
 
         if (status == 0) {
             take_semaphore(sid, CUT_SEM_NUM);
-            cutsCounter++;
+            // with this is good synchronizing but sometimes is hanging
+            // on wait function
+            // inital value of semaphore CUT has to be set on 1
+//            while(1) {
+//                take_semaphore(sid, FIFO_SEM_NUM);
+//                pid_t pid = bqueue_get_customer_from_chair(smaddr);
+//                give_semaphore(sid, FIFO_SEM_NUM);
+//                if (pid == getpid()) break;
+//            }
+            // take_semaphore(sid, CUT_SEM_NUM);
+            ++cutsCounter;
             printf(ANSI_COLOR_MAGENTA "[%zu] CLIENT (%d): Having hair cut."
                            ANSI_COLOR_RESET "\n", get_time(), getpid());
+            // give_semaphore(sid, CUT_SEM_NUM);
         }
     }
-
     clean();
 }
 

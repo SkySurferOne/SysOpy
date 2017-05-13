@@ -61,6 +61,23 @@ pid_t bqueue_get_customer_from_chair(pid_t *arr) {
     return arr[CHAIR_IND];
 }
 
+void bqueue_show(pid_t *arr) {
+    if (bqueue_empty(arr) == 1) {
+        printf(ANSI_COLOR_MAGENTA "Barber queue is empty." ANSI_COLOR_RESET "\n");
+        return;
+    }
+
+    int len = arr[CLI_NUM_IND]+4;
+    printf(ANSI_COLOR_MAGENTA "Barber queue:" ANSI_COLOR_RESET "\n");
+    for (int i=QUEUE_START_POINTER; i<len; i++) {
+        printf(ANSI_COLOR_MAGENTA "\t(%d) PID: %d" ANSI_COLOR_RESET "\n", i-QUEUE_START_POINTER, arr[i]);
+    }
+    printf(ANSI_COLOR_MAGENTA "\tTotal clients number on waiting room: %d" ANSI_COLOR_RESET "\n", arr[CLI_NUM_IND]);
+    printf(ANSI_COLOR_MAGENTA "Client PID who is on chair: %d" ANSI_COLOR_RESET "\n", arr[CHAIR_IND]);
+    printf(ANSI_COLOR_MAGENTA "Current pointer (index): %d" ANSI_COLOR_RESET "\n", arr[POINTER_IND]);
+    printf(ANSI_COLOR_MAGENTA "Queue size: %d" ANSI_COLOR_RESET "\n\n", arr[SIZE_IND]);
+}
+
 // semaphores
 void give_semaphore(int sid, unsigned short sind) {
     struct sembuf smbuf;

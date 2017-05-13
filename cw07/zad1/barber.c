@@ -64,9 +64,11 @@ void work_loop() {
 
         while(1) {
             take_semaphore(sid, FIFO_SEM_NUM);
+            bqueue_show(smaddr);
             clientPid = bqueue_get(smaddr);
 
             if(clientPid != -1) {
+                bqueue_occupy_chair(smaddr, clientPid);
                 make_haircut(clientPid);
                 give_semaphore(sid, FIFO_SEM_NUM);
             }
@@ -84,7 +86,8 @@ void work_loop() {
 
 void sigint_handler(int sig, siginfo_t *siginfo, void *context) {
     printf("Received sigint. Closing barber.\n");
-    exit(EXIT_SUCCESS);
+    breakWorkLoop = 1;
+    // exit(EXIT_SUCCESS);
 }
 
 void initialize_res() {

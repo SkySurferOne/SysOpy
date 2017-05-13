@@ -27,6 +27,7 @@ int bqueue_put(pid_t *, pid_t);
 pid_t bqueue_get(pid_t *);
 void bqueue_occupy_chair(pid_t *, pid_t);
 pid_t bqueue_get_customer_from_chair(pid_t *);
+void bqueue_show(pid_t *);
 
 // semaphores
 void give_semaphore(int, unsigned short);
