@@ -1,4 +1,3 @@
-#include <zconf.h>
 #include "common.h"
 
 
@@ -69,7 +68,6 @@ void make_clients() {
     for(int i = 0; i < parsedArgs->clientsNum; i++) {
         if(fork() == 0) {
             goto_barber();
-
             _exit(EXIT_SUCCESS);
         }
     }
@@ -163,7 +161,7 @@ void initialize_res() {
         exit(EXIT_FAILURE);
     }
 
-    // get id of shared memorys
+    // get id of shared memory
     int smid = shmget(key, 0, 0);
     if(smid == -1) {
         printf("shmget error\n");

@@ -1,5 +1,6 @@
 #include "common.h"
 
+
 #define SIZE_IND 0
 #define POINTER_IND 1
 #define CLI_NUM_IND 2

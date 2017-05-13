@@ -17,7 +17,7 @@ void work_loop();
 
 // globals
 ParsedArgs *parsedArgs;
-int sid, smid, * smaddr, breakWorkLoop = 0;
+int sid, smid, *smaddr, breakWorkLoop = 0;
 
 
 int main(int argc, char ** argv) {

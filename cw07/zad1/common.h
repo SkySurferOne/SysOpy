@@ -12,6 +12,7 @@
 #include <time.h>
 #include <signal.h>
 #include <wait.h>
+#include <unistd.h>
 
 // constants
 #define SEMG_KEY 1
