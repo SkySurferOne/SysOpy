@@ -1,0 +1,31 @@
+[519900] (id: 1) starting thread with TID 139727818479360
+[519920] (id: 2) starting thread with TID 139727810086656
+[520018] (id: 4) starting thread with TID 139727793301248
+[519968] (id: 3) starting thread with TID 139727801693952
+[520056] (id: 5) starting thread with TID 139727784908544
+[520423] starting gen_err_action with TID 139727701276416
+
+Process finished with exit code 136 (interrupted by signal 8: SIGFPE)
+
+=========================================================================
+* System info
+
+elementary OS 0.4 Loki (64-bit)
+Zbudowano na "Ubuntu 16.04.2 LTS"
+
+Linux
+damian-ThinkPad-T520
+4.4.0-72-generic
+#93-Ubuntu SMP Fri Mar 31 14:07:41 UTC 2017
+x86_64 x86_64 x86_64 GNU/Linux
+
+* Hardware
+
+description: Notebook
+product: 4242R46
+vendor: LENOVO
+version: ThinkPad T520
+
+Cztery rdzenie Intel® Core™ i5-2520M CPU @ 2.50GHz
+7,7 GiB
+Intel Corporation 2nd Generation Core Processor Family Integrated Graphics Controller (rev 09)
