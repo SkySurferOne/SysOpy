@@ -1,0 +1,260 @@
+[77453] params: threads 5, signal: SIGUSR1, case: 1
+[77531] (id: 1) starting thread with TID 140176462419712
+[77548] (id: 2) starting thread with TID 140176454027008
+[77579] (id: 3) starting thread with TID 140176445634304
+[77598] (id: 4) starting thread with TID 140176437241600
+[77615] (id: 5) starting thread with TID 140176428848896
+
+Process finished with exit code 10
+
+[421224] params: threads 5, signal: SIGTERM, case: 1
+[421306] (id: 1) starting thread with TID 140456196761344
+[421319] (id: 2) starting thread with TID 140456188368640
+[421351] (id: 3) starting thread with TID 140456179975936
+[421362] (id: 4) starting thread with TID 140456171583232
+[421380] (id: 5) starting thread with TID 140456163190528
+
+Process finished with exit code 15
+
+[449513] params: threads 5, signal: SIGKILL, case: 1
+[449596] (id: 1) starting thread with TID 140084980594432
+[449621] (id: 2) starting thread with TID 140084972201728
+[449641] (id: 3) starting thread with TID 140084963809024
+[449669] (id: 4) starting thread with TID 140084955416320
+[449686] (id: 5) starting thread with TID 140084947023616
+
+Process finished with exit code 9
+
+[708327] params: threads 5, signal: SIGSTOP, case: 1
+[708397] (id: 1) starting thread with TID 139819878606592
+[708412] (id: 2) starting thread with TID 139819870213888
+[708443] (id: 3) starting thread with TID 139819861821184
+[708455] (id: 4) starting thread with TID 139819853428480
+[708480] (id: 5) starting thread with TID 139819845035776
+
+===============================================================
+
+[709218] params: threads 5, signal: SIGUSR1, case: 2
+[709251] Set sigprocmask for SIGUSR1 in main process
+[709310] (id: 1) starting thread with TID 139868294620928
+[709342] (id: 2) starting thread with TID 139868286228224
+[709358] (id: 3) starting thread with TID 139868277835520
+[709373] (id: 4) starting thread with TID 139868269442816
+[709392] (id: 5) starting thread with TID 139868261050112
+[709399] Send signal SIGUSR1 to the main process
+[709496] (id: 3) end thread with TID 139868277835520 after sleeping
+[709496] (id: 1) end thread with TID 139868294620928 after sleeping
+[709516] (id: 2) end thread with TID 139868286228224 after sleeping
+[709527] (id: 4) end thread with TID 139868269442816 after sleeping
+[709539] (id: 5) end thread with TID 139868261050112 after sleeping
+[710168] Started threads: 5, ended threads: 5
+
+Process finished with exit code 0
+
+[791631] params: threads 5, signal: SIGTERM, case: 2
+[791672] Set sigprocmask for SIGTERM in main process
+[791858] Send signal SIGTERM to the main process
+[791892] (id: 3) starting thread with TID 139823276377856
+[791904] (id: 4) starting thread with TID 139823267985152
+[791912] (id: 5) starting thread with TID 139823259592448
+[791924] (id: 1) starting thread with TID 139823293163264
+[791931] (id: 2) starting thread with TID 139823284770560
+[792053] (id: 5) end thread with TID 139823259592448 after sleeping
+[792112] (id: 4) end thread with TID 139823267985152 after sleeping
+[792053] (id: 3) end thread with TID 139823276377856 after sleeping
+[792074] (id: 1) end thread with TID 139823293163264 after sleeping
+[792081] (id: 2) end thread with TID 139823284770560 after sleeping
+[792499] Started threads: 5, ended threads: 5
+
+Process finished with exit code 0
+
+[816044] params: threads 5, signal: SIGKILL, case: 2
+[816076] Set sigprocmask for SIGKILL in main process
+[816135] (id: 1) starting thread with TID 139978439640832
+[816164] (id: 2) starting thread with TID 139978431248128
+[816208] (id: 3) starting thread with TID 139978422855424
+[816235] (id: 4) starting thread with TID 139978414462720
+[816257] (id: 5) starting thread with TID 139978406070016
+
+Process finished with exit code 9
+
+[236129] params: threads 5, signal: SIGSTOP, case: 2
+[236164] Set sigprocmask for SIGSTOP in main process
+[236225] (id: 1) starting thread with TID 140568374032128
+[236238] (id: 2) starting thread with TID 140568365639424
+[236283] (id: 3) starting thread with TID 140568357246720
+[236653] (id: 4) starting thread with TID 140568348854016
+[237173] (id: 5) starting thread with TID 140568340461312
+
+===============================================================
+
+[77415] params: threads 5, signal: SIGUSR1, case: 3
+[77503] (id: 1) starting thread with TID 139936772785920
+[77531] (id: 2) starting thread with TID 139936764393216
+[77557] (id: 3) starting thread with TID 139936756000512
+[77583] (id: 4) starting thread with TID 139936747607808
+[77610] (id: 5) starting thread with TID 139936739215104
+[77622] PID = 5550 TID = -1843353856
+[77634] Send signal SIGUSR1 to the main process
+[77676] (id: 3) end thread with TID 139936756000512 after sleeping
+[77686] (id: 1) end thread with TID 139936772785920 after sleeping
+[77707] (id: 2) end thread with TID 139936764393216 after sleeping
+[77713] (id: 4) end thread with TID 139936747607808 after sleeping
+[77726] (id: 5) end thread with TID 139936739215104 after sleeping
+[78211] Started threads: 5, ended threads: 5
+
+Process finished with exit code 0
+
+[213636] params: threads 5, signal: SIGTERM, case: 3
+[213723] (id: 1) starting thread with TID 140524667115264
+[213739] (id: 2) starting thread with TID 140524658722560
+[213772] (id: 3) starting thread with TID 140524650329856
+[213786] (id: 4) starting thread with TID 140524641937152
+[213805] (id: 5) starting thread with TID 140524633544448
+[213811] PID = 5581 TID = 1935423232
+[213819] Send signal SIGTERM to the main process
+[213829] (id: 1) end thread with TID 140524667115264 after sleeping
+[213912] (id: 5) end thread with TID 140524633544448 after sleeping
+[213829] (id: 4) end thread with TID 140524641937152 after sleeping
+[213850] (id: 2) end thread with TID 140524658722560 after sleeping
+[213876] (id: 3) end thread with TID 140524650329856 after sleeping
+[214244] Started threads: 5, ended threads: 5
+
+Process finished with exit code 0
+
+[167051] params: threads 5, signal: SIGKILL, case: 3
+[167152] (id: 1) starting thread with TID 139755647207168
+[167186] (id: 3) starting thread with TID 139755630421760
+[167204] (id: 2) starting thread with TID 139755638814464
+[167218] (id: 4) starting thread with TID 139755622029056
+[167232] (id: 5) starting thread with TID 139755613636352
+
+Process finished with exit code 9
+
+[202855] params: threads 5, signal: SIGSTOP, case: 3
+[207371] (id: 2) starting thread with TID 140572398606080
+[207415] (id: 3) starting thread with TID 140572390213376
+[207428] (id: 4) starting thread with TID 140572381820672
+[207445] (id: 1) starting thread with TID 140572406998784
+
+===============================================================
+
+[717433] params: threads 5, signal: SIGUSR1, case: 4
+[717585] Running thread 2 with sigprocmask for SIGUSR1
+[717598] (id: 2) starting thread with TID 140385805522688
+[717616] Running thread 3 with sigprocmask for SIGUSR1
+[717621] (id: 3) starting thread with TID 140385797129984
+[717631] Running thread 4 with sigprocmask for SIGUSR1
+[717634] (id: 4) starting thread with TID 140385788737280
+[717651] Running thread 1 with sigprocmask for SIGUSR1
+[717660] (id: 1) starting thread with TID 140385813915392
+[717663] Send signal SIGUSR1 to the (1) thread.
+[717688] Send signal SIGUSR1 to the (2) thread.
+[717693] Send signal SIGUSR1 to the (3) thread.
+[717697] Send signal SIGUSR1 to the (4) thread.
+
+Process finished with exit code 10
+
+[338318] params: threads 5, signal: SIGTERM, case: 4
+[338415] Running thread 1 with sigprocmask for SIGTERM
+[338440] (id: 1) starting thread with TID 140713849829120
+[338480] Running thread 4 with sigprocmask for SIGTERM
+[338494] Running thread 5 with sigprocmask for SIGTERM
+[338510] (id: 5) starting thread with TID 140713816258304
+[338490] Send signal SIGTERM to the (1) thread.
+
+Process finished with exit code 15
+
+[44218] params: threads 5, signal: SIGKILL, case: 4
+[44299] Running thread 1 with sigprocmask for SIGKILL
+[44316] (id: 1) starting thread with TID 140392743941888
+[44318] Running thread 2 with sigprocmask for SIGKILL
+[44341] (id: 2) starting thread with TID 140392735549184
+[44344] Running thread 3 with sigprocmask for SIGKILL
+[44359] (id: 3) starting thread with TID 140392727156480
+[44371] Running thread 4 with sigprocmask for SIGKILL
+[44379] (id: 4) starting thread with TID 140392718763776
+[44397] Running thread 5 with sigprocmask for SIGKILL
+
+Process finished with exit code 9
+
+[979735] params: threads 5, signal: SIGSTOP, case: 4
+[979817] Running thread 1 with sigprocmask for SIGSTOP
+[979836] (id: 1) starting thread with TID 139771326166784
+[979857] Running thread 2 with sigprocmask for SIGSTOP
+[979867] (id: 2) starting thread with TID 139771317774080
+[979879] Running thread 3 with sigprocmask for SIGSTOP
+[979888] (id: 3) starting thread with TID 139771309381376
+[979900] Running thread 4 with sigprocmask for SIGSTOP
+[979910] (id: 4) starting thread with TID 139771300988672
+[979925] Running thread 5 with sigprocmask for SIGSTOP
+
+===============================================================
+
+[128927] params: threads 5, signal: SIGUSR1, case: 5
+[129009] (id: 1) starting thread with TID 140539088152320
+[129030] (id: 2) starting thread with TID 140539079759616
+[129055] (id: 3) starting thread with TID 140539071366912
+[129089] (id: 4) starting thread with TID 140539062974208
+[129107] (id: 5) starting thread with TID 140539054581504
+[129124] PID = 5824 TID = -831707392
+[129130] (id: 1) end thread with TID 140539088152320 after sleeping
+[129163] Send signal SIGUSR1 to the (1) thread.
+[129171] Send signal SIGUSR1 to the (2) thread.
+[129176] Send signal SIGUSR1 to the (3) thread.
+[129179] PID = 5824 TID = -840100096
+[129201] (id: 2) end thread with TID 140539079759616 after sleeping
+[129187] PID = 5824 TID = -856885504
+[129217] (id: 4) end thread with TID 140539062974208 after sleeping
+[129189] Send signal SIGUSR1 to the (4) thread.
+[129183] PID = 5824 TID = -848492800
+[129254] (id: 3) end thread with TID 140539071366912 after sleeping
+[129247] PID = 5824 TID = -865278208
+[129277] (id: 5) end thread with TID 140539054581504 after sleeping
+[129242] Send signal SIGUSR1 to the (5) thread.
+[129306] Send signals to the threads.
+[129320] Started threads: 5, ended threads: 5
+
+Process finished with exit code 0
+
+[890040] params: threads 5, signal: SIGTERM, case: 5
+[890253] Send signal SIGTERM to the (1) thread.
+[890262] Send signal SIGTERM to the (2) thread.
+[890267] Send signal SIGTERM to the (3) thread.
+[890271] Send signal SIGTERM to the (4) thread.
+[890275] Send signal SIGTERM to the (5) thread.
+[890279] Send signals to the threads.
+[890313] PID = 5858 TID = -760555776
+[890325] (id: 3) starting thread with TID 140195561920256
+[890336] PID = 5858 TID = -768948480
+[890341] (id: 4) starting thread with TID 140195553527552
+[890349] PID = 5858 TID = -777341184
+[890354] (id: 5) starting thread with TID 140195545134848
+[890366] PID = 5858 TID = -743770368
+[890371] (id: 1) starting thread with TID 140195578705664
+[890378] PID = 5858 TID = -752163072
+[890383] (id: 2) starting thread with TID 140195570312960
+[890423] (id: 4) end thread with TID 140195553527552 after sleeping
+[890430] (id: 3) end thread with TID 140195561920256 after sleeping
+[890446] (id: 5) end thread with TID 140195545134848 after sleeping
+[890464] (id: 1) end thread with TID 140195578705664 after sleeping
+[890474] (id: 2) end thread with TID 140195570312960 after sleeping
+[890803] Started threads: 5, ended threads: 5
+
+Process finished with exit code 0
+
+[580266] params: threads 5, signal: SIGKILL, case: 5
+[580350] (id: 1) starting thread with TID 139886397249280
+[580377] (id: 2) starting thread with TID 139886388856576
+[580410] (id: 3) starting thread with TID 139886380463872
+[580432] (id: 4) starting thread with TID 139886372071168
+[580454] (id: 5) starting thread with TID 139886363678464
+
+Process finished with exit code 9
+
+[663424] params: threads 5, signal: SIGSTOP, case: 5
+[663568] (id: 2) starting thread with TID 139966971733760
+[663615] (id: 4) starting thread with TID 139966954948352
+[663642] (id: 5) starting thread with TID 139966946555648
+[663650] Send signal SIGSTOP to the (1) thread.
+[663659] Send signal SIGSTOP to the (2) thread.

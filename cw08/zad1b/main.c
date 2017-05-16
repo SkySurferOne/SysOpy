@@ -124,7 +124,7 @@ void make_threads() {
 }
 
 void init() {
-    pthreads = (pthread_t *) calloc((size_t) parsedArgs->recordNum, sizeof(pthread_t));
+    pthreads = (pthread_t *) calloc((size_t) parsedArgs->threadNum, sizeof(pthread_t));
     pthread_key_create(&thread_log_key, cleanup);
 
     fileDesc = open(parsedArgs->fileName, O_RDONLY);
