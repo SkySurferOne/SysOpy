@@ -10,10 +10,11 @@ typedef struct ParsedArgs {
 typedef struct Client {
     int fd;
     int ponged;
+    struct sockaddr src_addr;
 } Client;
 
 // globals
-int server_unix_desc, server_inet_desc =1, epoll_fd = -1, clients_num = 0;
+int server_unix_desc = -1, server_inet_desc = -1, epoll_fd = -1, clients_num = 0;
 Client clients[CLIENT_MAX_NUM];
 pthread_t net_thread, ping_thread;
 ParsedArgs *parsed_args;
@@ -31,14 +32,14 @@ int soc_nonblock(int);
 void * net_routine(void *);
 void perform_opt(int opt);
 void help();
-void add_client(int);
-void close_client(int);
-int get_client();
+void add_client(int, struct sockaddr);
+void close_client(struct sockaddr src_addr);
+Client * get_client();
 void clear();
 void sigint_handler(int);
 void print_clients();
 void * ping_routine(void *);
-void set_ponged(int);
+void set_ponged(struct sockaddr src_addr);
 
 int main(int argc, char **argv) {
     parsed_args = malloc(sizeof(ParsedArgs));
@@ -77,14 +78,14 @@ void perform_opt(int opt) {
         return;
     }
 
-    int f = get_client();
+    Client *client = get_client();
 
-    if (f == -1) {
+    if (client == NULL) {
         printf("There is no clients.\n");
         fflush(stdout);
         return;
     }
-    msg.id = f;
+    msg.id = client->fd;
 
     printf("Write a and b:\n");
     fflush(stdout);
@@ -97,10 +98,9 @@ void perform_opt(int opt) {
     msg.a = a;
     msg.b = b;
 
-    if (send(f, &msg, sizeof(msg), 0) == -1) {
+    if (sendto(client->fd, &msg, sizeof(msg), 0, &client->src_addr, sizeof(client->src_addr)) == -1) {
         perror("send error");
     }
-
 }
 
 void * ping_routine(void *args) {
@@ -113,8 +113,8 @@ void * ping_routine(void *args) {
         for(int i = 0; i < clients_num; i++) {
             clients[i].ponged = 0;
             msg.id = clients[i].fd;
-            if (send(clients[i].fd, &msg, sizeof(msg), 0) == -1) {
-                perror("send error");
+            if (sendto(clients[i].fd, &msg, sizeof(msg), 0, &clients[i].src_addr, sizeof(clients[i].src_addr)) == -1) {
+                perror("send error - ping");
             }
         }
 
@@ -122,38 +122,39 @@ void * ping_routine(void *args) {
         sleep(SLEEP_AFTER_PING);
 
         pthread_mutex_lock(&client_mutex);
-        int *to_delete = calloc(clients_num, sizeof(int));
+        struct sockaddr **to_delete = calloc(clients_num, sizeof(struct sockaddr *));
+
         int j = 0;
-        for(int i = 0; i< clients_num; i++) {
+        for(int i = 0; i < clients_num; i++) {
             if (clients[i].ponged == 0) {
-                to_delete[j++] = clients[i].fd;
+                to_delete[j++] = &clients[i].src_addr;
             }
         }
         pthread_mutex_unlock(&client_mutex);
 
         for (int i=0; i<j; i++) {
-            close_client(to_delete[i]);
+            close_client(*to_delete[i]);
         }
         free(to_delete);
     }
 }
 
-int get_client() {
+Client * get_client() {
     srand((unsigned int) time(NULL));
 
     pthread_mutex_lock(&client_mutex);
 
     if (clients_num == 0) {
         pthread_mutex_unlock(&client_mutex);
-        return -1;
+        return NULL;
     }
 
     int r = rand() % clients_num;
-    int fd = clients[r].fd;
+    Client * client = &clients[r];
 
     pthread_mutex_unlock(&client_mutex);
 
-    return fd;
+    return client;
 }
 
 void loop() {
@@ -212,23 +213,21 @@ int soc_nonblock(int fd) {
     return 0;
 }
 
-void close_client(int fd) {
+void close_client(struct sockaddr src_addr) {
     pthread_mutex_lock(&client_mutex);
 
-    for (int i = 0, j = 0; i < clients_num; i++) {
-        if (clients[i].fd != fd) {
-            clients[j].fd = clients[i].fd;
-            clients[j++].ponged = clients[i].ponged;
-        }
-        else {
-            if (close(fd) == -1) {
-                perror("close error - cannot close client fd");
+    for (int i = 0; i < clients_num; i++) {
+        if (memcmp(&clients[i].src_addr, &src_addr, sizeof(src_addr)) == 0) {
+            for(int j = i+1, k = i; j < clients_num; j++, k--) {
+                clients[k].fd = clients[i].fd;
+                clients[k].ponged = clients[i].ponged;
+                memcpy(&clients[k].src_addr, &clients[i].src_addr, sizeof(clients[j].src_addr));
             }
+            clients_num--;
+            print_clients();
+            break;
         }
     }
-
-    clients_num--;
-    print_clients();
     pthread_mutex_unlock(&client_mutex);
 }
 
@@ -240,7 +239,7 @@ void print_clients() {
     printf("\tTotal: %d\n", clients_num);
 }
 
-void add_client(int fd) {
+void add_client(int fd, struct sockaddr src_addr) {
     pthread_mutex_lock(&client_mutex);
 
     if (clients_num >= CLIENT_MAX_NUM) {
@@ -250,7 +249,10 @@ void add_client(int fd) {
     }
 
     clients[clients_num].fd = fd;
-    clients[clients_num++].ponged = -1;
+    clients[clients_num].ponged = -1;
+    memcpy(&clients[clients_num].src_addr, &src_addr, sizeof(src_addr));
+    clients_num++;
+
     print_clients();
     pthread_mutex_unlock(&client_mutex);
 }
@@ -269,16 +271,6 @@ void * net_routine(void *arg) {
 
     if (soc_nonblock(server_unix_desc) == -1) {
         perror("soc_nonblock error - setting nonblock unix failed");
-        exit(EXIT_FAILURE);
-    }
-
-    if (listen(server_inet_desc, SOMAXCONN) == -1) {
-        perror("failed listening on internet socket");
-        exit(EXIT_FAILURE);
-    }
-
-    if (listen(server_unix_desc, SOMAXCONN) == -1) {
-        perror("listen error");
         exit(EXIT_FAILURE);
     }
 
@@ -312,73 +304,25 @@ void * net_routine(void *arg) {
         for (int i = 0; i < n; i++) {
             event = events[i];
             if ((event.events & EPOLLERR) != 0 ||
-                (event.events & EPOLLHUP) != 0) {
+                (event.events & EPOLLHUP) != 0 ||
+                (event.events & EPOLLRDHUP) != 0) {
 
                 perror("epoll fd error");
-                if (event.data.fd != server_inet_desc && event.data.fd != server_unix_desc) {
-                    close_client(event.data.fd);
-                }
 
-            }
-            else if ((event.events & EPOLLRDHUP) != 0) {
-                if (event.data.fd != server_inet_desc &&
-                    event.data.fd != server_unix_desc) {
-                    close_client(event.data.fd);
-                }
-
-            }
-            else if (event.data.fd == server_inet_desc ||
-                     event.data.fd == server_unix_desc) {
-
-                while (1) {
-                    struct sockaddr in_addr;
-                    socklen_t len = sizeof(in_addr);
-                    struct epoll_event event2;
-
-                    int fd = accept(event.data.fd, &in_addr, &len);
-                    if (fd == -1) {
-                        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                            break;
-                        } else {
-                            perror("accept error");
-                            break;
-                        }
-                    }
-
-                    if (soc_nonblock(fd) == -1) {
-                        perror("error soc_nonblock");
-                        exit(EXIT_FAILURE);
-                    }
-
-                    event2.events = EPOLLIN | EPOLLET;
-                    event2.data.fd = fd;
-
-                    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &event2) == -1) {
-                        perror("failed to add incoming socket to epoll");
-                        exit(EXIT_FAILURE);
-                    }
-
-                    add_client(fd);
-                }
             }
             else {
                 while (1) {
                     message msg;
-                    ssize_t count = recv(event.data.fd, &msg, sizeof(msg), MSG_WAITALL);
+                    struct sockaddr addr;
+                    socklen_t len = sizeof(addr);
+
+                    ssize_t count = recvfrom(event.data.fd, &msg, sizeof(msg), MSG_WAITALL, &addr, &len);
 
                     if (count == -1) {
                         if (errno != EAGAIN) {
                             perror("recv error");
-                            close_client(event.data.fd);
                         }
                         break;
-                    }
-                    else if (count == 0) {
-                        close_client(event.data.fd);
-                        break;
-                    } else if (count < sizeof(msg)) {
-                        perror("Received partial message");
-                        continue;
                     }
                     else {
                         switch (msg.msg_type) {
@@ -387,20 +331,23 @@ void * net_routine(void *arg) {
                                 fflush(stdout);
                                 break;
                             case KILL:
-                                close_client(event.data.fd);
+                                // printf("kill");
+                                close_client(addr);
                                 break;
                             case CONNECT:
                                 printf("%s connected\n", msg.name);
+                                add_client(event.data.fd, addr);
                                 break;
                             case PONG:
                                 // printf("%d ponged\n", event.data.fd);
-                                set_ponged(event.data.fd);
+                                set_ponged(addr);
                                 break;
                             default:
                                 printf("unknown message type\n");
                                 break;
                         }
                     }
+
                 }
             }
         }
@@ -410,10 +357,10 @@ void * net_routine(void *arg) {
     return NULL;
 }
 
-void set_ponged(int fd) {
+void set_ponged(struct sockaddr src_addr) {
     pthread_mutex_lock(&client_mutex);
     for (int i=0; i<clients_num; i++) {
-        if (clients[i].fd == fd) {
+        if (memcmp(&clients[i].src_addr, &src_addr, sizeof(src_addr)) == 0) {
             clients[i].ponged = 1;
             break;
         }
@@ -437,7 +384,7 @@ void init_inet_soc() {
     struct sockaddr_in sockaddr_inet_serv;
     memset(&sockaddr_inet_serv, 0, sizeof(sockaddr_inet_serv));
 
-    if ((server_inet_desc = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+    if ((server_inet_desc = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
         perror("socket eror");
         exit(EXIT_FAILURE);
     }
@@ -456,7 +403,7 @@ void init_unix_soc() {
     struct sockaddr_un sockaddr_un_serv;
     memset(&sockaddr_un_serv, 0, sizeof(sockaddr_un_serv));
 
-    if ((server_unix_desc = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+    if ((server_unix_desc = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1) {
         perror("socket error");
         exit(EXIT_FAILURE);
     }
@@ -472,6 +419,10 @@ void init_unix_soc() {
 }
 
 void clear() {
+    while(clients_num > 0) {
+        close_client(clients[0].src_addr);
+    }
+
     if ((errno = pthread_cancel(net_thread)) == -1) {
         perror("pthread_cancel error - net_thread");
     }
@@ -497,10 +448,6 @@ void clear() {
     }
 
     if (server_unix_desc != -1) {
-        if (shutdown(server_unix_desc, SHUT_RDWR) == -1) {
-            perror("shutdown error - unix shutdown failed");
-        }
-
         if (close(server_unix_desc) == -1) {
             perror("shutdown error - closing unix socket failed");
         }
@@ -513,10 +460,6 @@ void clear() {
     }
 
     if (server_inet_desc != -1) {
-        if (shutdown(server_inet_desc, SHUT_RDWR) == -1) {
-            perror("failed shutting down internet socket");
-        }
-
         if (close(server_inet_desc) == -1) {
             perror("failed closing internet socket");
         }

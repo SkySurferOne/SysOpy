@@ -61,6 +61,8 @@ int main(int argc, char **argv) {
 void dec_readers() {
     pthread_mutex_lock(&inc_mutex);
     --readersNum;
+    if (readersNum == 0)
+        pthread_cond_broadcast(&cond);
     pthread_mutex_unlock(&inc_mutex);
 }
 

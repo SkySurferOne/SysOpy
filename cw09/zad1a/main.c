@@ -151,7 +151,7 @@ void *writer_routine(void *args) {
         // release semaphore
         release_sem(&resourceAccess);
 
-        usleep(USLEEP_WRITER_TIME);
+        // usleep(USLEEP_WRITER_TIME);
     }
 
     return NULL;
@@ -194,7 +194,7 @@ void *reader_routine(void *args){
         // decrement readers and unlock writers if there is no readers anymore
         dec_readers();
 
-        usleep(USLEEP_READERS_TIME);
+        // usleep(USLEEP_READERS_TIME);
     }
 
     return NULL;

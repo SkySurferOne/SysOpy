@@ -36,7 +36,7 @@ int fal_add(fixed_array_list *l, int item) {
 
     return LIST_OK;
 }
-
+//
 int fal_pop(fixed_array_list *l) {
     return fal_remove(l, 0);
 }
