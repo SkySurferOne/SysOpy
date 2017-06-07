@@ -23,8 +23,9 @@ void help();
 void init();
 void send_greeting();
 void clear();
-void perform_task(int, int, int);
+void perform_task(int, int, int, int);
 void sigint_handler(int);
+void send_pong();
 
 int main(int argc, char *argv[]) {
     parsed_args = malloc(sizeof(ParsedArgs));
@@ -63,14 +64,14 @@ void loop() {
 
         switch (msg.msg_type) {
             case PERFORM_TASK:
-                printf("Received a task\n");
+                printf("Received a task no. %d\n", msg.task);
                 fflush(stdout);
-                perform_task(msg.task, msg.id, msg.msg_type);
+                perform_task(msg.task, msg.id, msg.a, msg.b);
                 break;
             case PING:
-                printf("Pinged\n");
+                // printf("Pinged\n");
                 fflush(stdout);
-                // send_alive();
+                send_pong();
                 break;
             case KILL:
                 exit(EXIT_SUCCESS);
@@ -80,25 +81,31 @@ void loop() {
     }
 }
 
-void perform_task(int task, int id, int task_type) {
+void send_pong() {
+    message msg;
+    msg.msg_type = PONG;
+    send(soc, &msg, sizeof(msg), 0);
+}
+
+void perform_task(int task, int id, int a, int b) {
     message msg;
     msg.msg_type = RESULT;
 
     int result = 0;
     msg.id = id;
 
-    switch (task_type) {
+    switch (task) {
         case SUM:
-            result = msg.a + msg.b;
+            result = a + b;
             break;
         case SUB:
-            result = msg.a - msg.b;
+            result = a - b;
             break;
         case MUL:
-            result = msg.a * msg.b;
+            result = a * b;
             break;
         case DIV:
-            result = msg.a / msg.b;
+            result = a / b;
             break;
         default:
             printf("unknown task\n");
@@ -134,7 +141,6 @@ void clear() {
 }
 
 void sigint_handler(int sig) {
-    clear();
     exit(EXIT_SUCCESS);
 }
 

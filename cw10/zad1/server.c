@@ -7,10 +7,15 @@ typedef struct ParsedArgs {
     char path[PATH_MAX];
 } ParsedArgs;
 
+typedef struct Client {
+    int fd;
+    int ponged;
+} Client;
+
 // globals
-int server_unix_desc, server_inet_desc, epool_fd;
-int clients[CLIENT_MAX_NUM], clients_num = 0;
-pthread_t net_thread;
+int server_unix_desc, server_inet_desc, epoll_fd, clients_num = 0;
+Client clients[CLIENT_MAX_NUM];
+pthread_t net_thread, ping_thread;
 ParsedArgs *parsed_args;
 pthread_mutex_t client_mutex = PTHREAD_MUTEX_INITIALIZER;
 struct epoll_event events[MAX_EPOLL_EVENTS];
@@ -31,6 +36,9 @@ void close_client(int);
 int get_client();
 void clear();
 void sigint_handler(int);
+void print_clients();
+void * ping_routine(void *);
+void set_ponged(int);
 
 int main(int argc, char **argv) {
     parsed_args = malloc(sizeof(ParsedArgs));
@@ -53,7 +61,6 @@ void help() {
 }
 
 void perform_opt(int opt) {
-    printf("performing %d\n", opt);
     fflush(stdout);
 
     int a, b;
@@ -77,6 +84,7 @@ void perform_opt(int opt) {
         fflush(stdout);
         return;
     }
+    msg.id = f;
 
     printf("Write a and b:\n");
     fflush(stdout);
@@ -95,6 +103,42 @@ void perform_opt(int opt) {
 
 }
 
+void * ping_routine(void *args) {
+    message msg;
+    msg.msg_type = PING;
+
+    while(1) {
+        pthread_mutex_lock(&client_mutex);
+
+        for(int i = 0; i < clients_num; i++) {
+            clients[i].ponged = 0;
+            msg.id = clients[i].fd;
+            if (send(clients[i].fd, &msg, sizeof(msg), 0) == -1) {
+                perror("send error");
+            }
+        }
+
+        pthread_mutex_unlock(&client_mutex);
+        sleep(SLEEP_AFTER_PING);
+
+        // TODO fix this
+        pthread_mutex_lock(&client_mutex);
+        int *to_delete = calloc(clients_num, sizeof(int));
+        int j = 0;
+        for(int i = 0; i< clients_num; i++) {
+            if (clients[i].ponged == 0) {
+                to_delete[j++] = clients[i].fd;
+            }
+        }
+        pthread_mutex_unlock(&client_mutex);
+
+        for (int i=0; i<j; i++) {
+            close_client(to_delete[i]);
+        }
+        free(to_delete);
+    }
+}
+
 int get_client() {
     srand((unsigned int) time(NULL));
 
@@ -106,7 +150,7 @@ int get_client() {
     }
 
     int r = rand() % clients_num;
-    int fd = clients[r];
+    int fd = clients[r].fd;
 
     pthread_mutex_unlock(&client_mutex);
 
@@ -143,7 +187,12 @@ void init() {
 
 void make_thread() {
     if (pthread_create(&net_thread, NULL, net_routine, NULL) == -1) {
-        perror("error pthread_create\n");
+        perror("pthread_create error - net_thread");
+        exit(EXIT_FAILURE);
+    }
+
+    if(pthread_create(&ping_thread, NULL, ping_routine, NULL)){
+        perror("pthread_create error - net_thread");
         exit(EXIT_FAILURE);
     }
 }
@@ -168,18 +217,28 @@ void close_client(int fd) {
     pthread_mutex_lock(&client_mutex);
 
     for (int i = 0, j = 0; i < clients_num; i++) {
-        if (clients[i] != fd) {
-            clients[j++] = clients[i];
+        if (clients[i].fd != fd) {
+            clients[j].fd = clients[i].fd;
+            clients[j++].ponged = clients[i].ponged;
         }
         else {
             if (close(fd) == -1) {
-                perror("close error - cannot close clinet fd");
+                perror("close error - cannot close client fd");
             }
         }
     }
 
     clients_num--;
+    print_clients();
     pthread_mutex_unlock(&client_mutex);
+}
+
+void print_clients() {
+    printf("Connected clients:\n");
+    for (int i=0; i<clients_num; i++) {
+        printf("\t(%d) fd: %d\n", i+1, clients[i].fd);
+    }
+    printf("\tTotal: %d\n", clients_num);
 }
 
 void add_client(int fd) {
@@ -191,8 +250,9 @@ void add_client(int fd) {
         exit(EXIT_FAILURE);
     }
 
-    clients[clients_num++] = fd;
-
+    clients[clients_num].fd = fd;
+    clients[clients_num++].ponged = -1;
+    print_clients();
     pthread_mutex_unlock(&client_mutex);
 }
 
@@ -223,8 +283,8 @@ void * net_routine(void *arg) {
         exit(EXIT_FAILURE);
     }
 
-    epool_fd = epoll_create1(0);
-    if (epool_fd == -1) {
+    epoll_fd = epoll_create1(0);
+    if (epoll_fd == -1) {
         perror("error epoll_create1");
         exit(EXIT_FAILURE);
     }
@@ -232,19 +292,19 @@ void * net_routine(void *arg) {
     event.data.fd = server_inet_desc;
     event.events = EPOLLIN | EPOLLRDHUP;
 
-    if (epoll_ctl(epool_fd, EPOLL_CTL_ADD, server_inet_desc, &event) == -1) {
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, server_inet_desc, &event) == -1) {
         perror("epoll_ctl error - adding inet to epool failed");
         exit(EXIT_FAILURE);
     }
 
     event.data.fd = server_unix_desc;
-    if (epoll_ctl(epool_fd, EPOLL_CTL_ADD, server_unix_desc, &event) == -1) {
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, server_unix_desc, &event) == -1) {
         perror("epoll_ctl error - adding unix to epool failed");
         exit(EXIT_FAILURE);
     }
 
     while (1) {
-        int n = epoll_wait(epool_fd, events, MAX_EPOLL_EVENTS, -1);
+        int n = epoll_wait(epoll_fd, events, MAX_EPOLL_EVENTS, -1);
         if (n == -1) {
             perror("epoll_wait");
             return NULL;
@@ -294,7 +354,7 @@ void * net_routine(void *arg) {
                     event2.events = EPOLLIN | EPOLLET;
                     event2.data.fd = fd;
 
-                    if (epoll_ctl(epool_fd, EPOLL_CTL_ADD, fd, &event2) == -1) {
+                    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &event2) == -1) {
                         perror("failed to add incoming socket to epoll");
                         exit(EXIT_FAILURE);
                     }
@@ -333,6 +393,10 @@ void * net_routine(void *arg) {
                             case CONNECT:
                                 printf("%s connected\n", msg.name);
                                 break;
+                            case PONG:
+                                // printf("%d ponged\n", event.data.fd);
+                                set_ponged(event.data.fd);
+                                break;
                             default:
                                 printf("unknown message type\n");
                                 break;
@@ -345,6 +409,15 @@ void * net_routine(void *arg) {
 
     perror("thread finished work\n");
     return NULL;
+}
+
+void set_ponged(int fd) {
+    for (int i=0; i<clients_num; i++) {
+        if (clients[i].fd == fd) {
+            clients[i].ponged = 1;
+            break;
+        }
+    }
 }
 
 void parse_args(int argc, char **argv) {
@@ -381,14 +454,15 @@ void init_inet_soc() {
 void init_unix_soc() {
     struct sockaddr_un sockaddr_un_serv;
     memset(&sockaddr_un_serv, 0, sizeof(sockaddr_un_serv));
-    sockaddr_un_serv.sun_family = AF_UNIX;
 
     if ((server_unix_desc = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
         perror("socket error");
         exit(EXIT_FAILURE);
     }
 
+    sockaddr_un_serv.sun_family = AF_UNIX;
     strncpy(sockaddr_un_serv.sun_path, parsed_args->path, PATH_MAX);
+    unlink(sockaddr_un_serv.sun_path);
 
     if (bind(server_unix_desc, (struct sockaddr *) &sockaddr_un_serv, sizeof(sockaddr_un_serv)) == -1) {
         perror("bind error");
@@ -398,19 +472,27 @@ void init_unix_soc() {
 
 void clear() {
     if ((errno = pthread_cancel(net_thread)) == -1) {
-        perror("pthread_cancel error");
+        perror("pthread_cancel error - net_thread");
     }
 
     if ((errno = pthread_join(net_thread, NULL)) == -1) {
-        perror("pthread_join error");
+        perror("pthread_join error - net_thread");
     }
 
-    if (epool_fd != -1) {
-        if (close(epool_fd) == -1) {
+    if ((errno = pthread_cancel(ping_thread)) == -1) {
+        perror("pthread_cancel error - ping_thread");
+    }
+
+    if ((errno = pthread_join(ping_thread, NULL)) == -1) {
+        perror("pthread_join error - ping_thread");
+    }
+
+    if (epoll_fd != -1) {
+        if (close(epoll_fd) == -1) {
             perror("error close - closing epoll fd failed");
         }
 
-        epool_fd = -1;
+        epoll_fd = -1;
     }
 
     if (server_unix_desc != -1) {
@@ -447,6 +529,5 @@ void clear() {
 }
 
 void sigint_handler(int sig) {
-    // clear();
     exit(EXIT_SUCCESS);
 }

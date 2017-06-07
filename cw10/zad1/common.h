@@ -48,6 +48,8 @@ typedef struct {
 #define KILL 8
 #define CONNECT 9
 #define PING 10
+#define PONG 11
 
+#define SLEEP_AFTER_PING 5
 
 #endif //ZAD1_COMMON_H
